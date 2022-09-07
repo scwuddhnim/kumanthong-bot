@@ -1,92 +1,66 @@
 import 'dotenv/config';
 import express from 'express';
 import lodash from 'lodash';
+
 import {
   InteractionType,
   InteractionResponseType,
 } from 'discord-interactions';
 import { VerifyDiscordRequest } from './utils.js';
-import {
-  HasGuildCommands,
-  RANDOM_COMMAND
-} from './commands.js';
+import { HasGuildCommands } from './commands.js';
+import handleCommands from './services/application-command-service.js';
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3006;
 app.use(express.json({ verify: VerifyDiscordRequest(process.env.PUBLIC_KEY) }));
 
 app.post('/interactions', async function (req, res) {
-  const { type, id, data } = req.body;
+  const { type, data } = req.body;
 
   if (type === InteractionType.PING) {
     return res.send({ type: InteractionResponseType.PONG });
   }
 
   if (type === InteractionType.APPLICATION_COMMAND) {
-    const { name } = data;
-
-    if (name === 'random') {
-      return res.send({
-        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-        data: {
-          "content": "chọn 1 đứa xuống lấy cơm nào",
-          "components": [
-            {
-              "type": 1,
-              "components": [
-                {
-                  "type": 3,
-                  "custom_id": "list_members",
-                  "options": [
-                    {
-                      "label": "Tống Minh Đức",
-                      "value": "827026836860567612"
-                    },
-                    {
-                      "label": "Nguyễn Duy Trường",
-                      "value": "743137088463175700"
-                    },
-                    {
-                      "label": "Văn Trung Hiếu",
-                      "value": "496343192753405963"
-                    }
-                  ],
-                  "placeholder": "choose members",
-                  "min_values": 1,
-                  "max_values": 3
-                }
-              ]
-            }
-          ]
-        }
-      });
-    }
-  }
-
-  if (type === InteractionType.MESSAGE_COMPONENT) {
-    const componentId = data.custom_id;
-
-    if (componentId === 'list_members') {
-      const listMemberIds = lodash.get(data, 'values');
-      const randomMemberId = lodash.sample(listMemberIds);
-      res.send({
-        type: 4,
-        data: {
-          content: `aiss chết tiệt hôm nay <@${randomMemberId}> phải xuống lấy cơm rồi`
-        }
-      });
-    }
+    return handleCommands(req, res);
   }
 });
 
 app.listen(PORT, () => {
   console.log('Listening on port', PORT);
-
   HasGuildCommands(
     process.env.APP_ID,
     process.env.GUILD_ID,
     [
-      RANDOM_COMMAND
+      {
+        name: 'list',
+        description: 'list command'
+      },
+      {
+        name: 'register',
+        description: 'register command'
+      },
+      {
+        name: 'clear',
+        description: 'clear command'
+      },
+      {
+        name: 'remove',
+        description: 'remove command'
+      },
+      {
+        name: 'random',
+        description: 'random command',
+        options: [
+          {
+            type: 4,
+            name: 'num',
+            description: 'number of random members',
+            required: true,
+            min_value: 1
+          }
+        ]
+      }
     ]
   );
 });

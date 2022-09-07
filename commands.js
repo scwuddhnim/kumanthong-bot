@@ -41,8 +41,3 @@ export async function InstallGuildCommand(appId, guildId, command) {
     console.error(err);
   }
 }
-
-export const RANDOM_COMMAND = {
-  name: 'random',
-  description: 'choose some members randomly in team'
-}
