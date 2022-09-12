@@ -18,6 +18,17 @@ async function handleListCommand(req, res) {
   });
 }
 
+async function handleCountCommand(req, res) {
+  const count = listRegisteredUsers.length;
+  const content = `đã có ${count} người đăng ký cơm nhớ!`;
+  return res.send({
+    type: 4,
+    data: {
+      content: content
+    }
+  });
+}
+
 async function handleRegisterCommand(req, res) {
   const userId = lodash.get(req, 'body.member.user.id');
   if (!lodash.includes(listRegisteredUsers, userId)) {
@@ -121,6 +132,7 @@ export default async function handleCommands(req, res) {
     'register': handleRegisterCommand,
     'clear': handleClearCommand,
     'remove': handleRemoveCommand,
-    'random': handleRandomCommand
+    'random': handleRandomCommand,
+    'count': handleCountCommand,
   }[commandName](req, res);
 };

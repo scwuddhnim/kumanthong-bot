@@ -58,7 +58,11 @@ app.listen(PORT, () => {
             min_value: 1
           }
         ]
-      }
+      },
+      {
+        name: 'count',
+        description: 'count command'
+      },
     ]
   );
 });
